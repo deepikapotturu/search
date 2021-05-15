@@ -2,9 +2,9 @@
 
 Gives number of occurrences of a word in case-sensitive manner. Also shows similar words for a given word. A word is considered similar if Levenshtein distance is less than or equal to 1.
 
-##Comments
+## Comments
 
-###Scope
+### Scope
 
 The application searches for the word in a text file given by the user via UI. You can find words with alphabets and numbers. 
 I have used the maximum time (8 hours)
