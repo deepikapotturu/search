@@ -8,8 +8,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-
-import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
@@ -17,9 +15,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class SearchControllerTest {
 
     public static final String END_POINT = "/search";
-    public static final String PARAMETER_NAME = "searchInput";
+    public static final String SEARCH_INPUT = "searchInput";
     public static final String FLASH_ATTRIBUTE_COUNT = "count";
     public static final String FLASH_ATTRIBUTE_SIMILAR = "similarWords";
+    public static String FINDINGS_DOC = "Word Words Word Wor";
 
     @Autowired
     private MockMvc mockMvc;
@@ -32,7 +31,7 @@ class SearchControllerTest {
 
     @Test
     public void search_postRequestHasFlashAttributes() throws Exception {
-        this.mockMvc.perform(post(END_POINT).param(PARAMETER_NAME, "Foo"))
+        this.mockMvc.perform(post(END_POINT).param(SEARCH_INPUT, "Foo").param("findingsDoc", FINDINGS_DOC))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(END_POINT))
                 .andExpect(flash().attribute(FLASH_ATTRIBUTE_COUNT, "The word \"Foo" + "\" appears 0" + " times in the text."))
@@ -41,16 +40,25 @@ class SearchControllerTest {
 
     @Test
     public void search_postRequestHasFlashAttributesFoundWords() throws Exception {
-        this.mockMvc.perform(post(END_POINT).param("searchInput", "Lorem"))
+        this.mockMvc.perform(post(END_POINT).param("searchInput", "Word").param("findingsDoc", FINDINGS_DOC))
                 .andExpect(status().is3xxRedirection())
                 .andExpect(redirectedUrl(END_POINT))
-                .andExpect(flash().attribute(FLASH_ATTRIBUTE_COUNT, "The word \"Lorem" + "\" appears 2" + " times in the text."))
-                .andExpect(flash().attribute(FLASH_ATTRIBUTE_SIMILAR, "Similar words for \"Lorem" + "\" are: " + "[lorem]"));
+                .andExpect(flash().attribute(FLASH_ATTRIBUTE_COUNT, "The word \"Word" + "\" appears 2" + " times in the text."))
+                .andExpect(flash().attribute(FLASH_ATTRIBUTE_SIMILAR, "Similar words for \"Word" + "\" are: " + "[Words, Wor]"));
+    }
+
+    @Test
+    public void search_postRequestHasFlashAttributesFoundWordsWithSpaces() throws Exception {
+        this.mockMvc.perform(post(END_POINT).param("searchInput", " Word ").param("findingsDoc", FINDINGS_DOC))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(redirectedUrl(END_POINT))
+                .andExpect(flash().attribute(FLASH_ATTRIBUTE_COUNT, "The word \"Word" + "\" appears 2" + " times in the text."))
+                .andExpect(flash().attribute(FLASH_ATTRIBUTE_SIMILAR, "Similar words for \"Word" + "\" are: " + "[Words, Wor]"));
     }
 
     @Test
     public void search_postRequest() throws Exception {
-        this.mockMvc.perform(post(END_POINT).param(PARAMETER_NAME, ""))
+        this.mockMvc.perform(post(END_POINT).param(SEARCH_INPUT, ""))
                 .andExpect(status().is2xxSuccessful());
     }
 
@@ -58,7 +66,10 @@ class SearchControllerTest {
     public void search_getRequestShowsSearchBox() throws Exception {
         this.mockMvc.perform(get(END_POINT))
                 .andExpect(status().isOk())
-                .andExpect(xpath("//form/div/input[@name='searchInput']").exists());
+                .andExpect(xpath("//form/div/input[@name='searchInput']").exists())
+                .andExpect(xpath("//form/div/textarea[@name='findingsDoc']").exists());
     }
+
+
 
 }

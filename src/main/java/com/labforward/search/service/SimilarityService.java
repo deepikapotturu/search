@@ -1,28 +1,19 @@
 package com.labforward.search.service;
 
-import org.apache.commons.io.IOUtils;
 import org.springframework.stereotype.Service;
 
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
 public class SimilarityService {
-    static final String FILEPATH = "/Users/lakshmideepika.pott/IdeaProjects/search/src/main/resources/static/DummyText";
-    static final String REGEX = "[^a-zA-Z0-9 \\s]";
     private static final int DISTANCE_THRESHOLD = 1;
 
-    public Set<String> getSimilarWords(String similarityCheckString) throws IOException {
-        String trimmedSimilarityCheckString = similarityCheckString.trim();
+    public Set<String> getSimilarWords(String similarityCheckString, String[] findingsDoc) throws IOException {
         Set<String> similarWords = new HashSet<>();
-        FileInputStream fis = new FileInputStream(FILEPATH);
-        String data = IOUtils.toString(fis, StandardCharsets.UTF_8);
-        String[] formattedString = data.replaceAll(REGEX, "").split("\\s");
-        for (String word: formattedString) {
-           int levenshteinDistance = calculate(trimmedSimilarityCheckString, word);
-           if (levenshteinDistance <= DISTANCE_THRESHOLD && !trimmedSimilarityCheckString.equals(word)) {
+        for (String word: findingsDoc) {
+           int levenshteinDistance = calculate(similarityCheckString, word);
+           if (levenshteinDistance <= DISTANCE_THRESHOLD && !similarityCheckString.equals(word)) {
                similarWords.add(word);
            }
         }

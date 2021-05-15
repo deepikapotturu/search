@@ -1,16 +1,18 @@
 package com.labforward.search.service;
 
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 class FrequencyServiceTest {
+
+    public static String[] FINDINGS_DOC = {"Word", "word", "Wor", "Words"};
 
     @InjectMocks
     FrequencyService frequencyService = new FrequencyService();
@@ -19,21 +21,10 @@ class FrequencyServiceTest {
     public void getCount_whenOccurred() throws IOException {
         //Arrange
         String searchString = "Word";
-        //Act
-        long actual = frequencyService.getCount(searchString);
-        long expected = 3;
 
-        //Assert
-        assertEquals(actual, expected);
-    }
-
-    @Test
-    public void getCount_whenInputHasTrailingSpaces() throws IOException {
-        //Arrange
-        String searchString = " Word ";
         //Act
-        long actual = frequencyService.getCount(searchString);
-        long expected = 3;
+        long actual = frequencyService.getCount(searchString, FINDINGS_DOC);
+        long expected = 1;
 
         //Assert
         assertEquals(actual, expected);
@@ -44,7 +35,7 @@ class FrequencyServiceTest {
         //Arrange
         String searchString = "FooBar";
         //Act
-        long actual = frequencyService.getCount(searchString);
+        long actual = frequencyService.getCount(searchString, FINDINGS_DOC);
         long expected = 0;
 
         //Assert

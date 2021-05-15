@@ -15,7 +15,7 @@ public class SearchController {
     public static final String TEMPLATE = "notebook";
     public static final String FLASH_ATTRIBUTE_SIMILAR = "similarWords";
     public static final String FLASH_ATTRIBUTE_COUNT = "count";
-
+    static final String REGEX = "[^a-zA-Z0-9 \\s]";
 
     public FrequencyService frequencyService;
     public SimilarityService similarityService;
@@ -25,17 +25,23 @@ public class SearchController {
         this.similarityService = similarityService;
     }
 
-    @RequestMapping(value = "/search")
+    @PostMapping(value = "/search")
     public String search(@RequestParam(value = "searchInput", required = false) String searchInput,
+                         @RequestParam(value = "findingsDoc", required = false) String findingsDoc,
                          RedirectAttributes redirectAttributes) throws IOException {
-        if (!searchInput.isEmpty()) {
-            long count = frequencyService.getCount(searchInput);
-            Set<String> similarWords = similarityService.getSimilarWords(searchInput);
-            redirectAttributes.addFlashAttribute(FLASH_ATTRIBUTE_COUNT, "The word \"" + searchInput + "\" appears " + count + " times in the text.");
+        if (searchInput != null && !searchInput.isEmpty() && findingsDoc != null && !findingsDoc.isEmpty()) {
+            String trimmedSearchString = searchInput.trim();
+            String[] formattedString = findingsDoc.replaceAll(REGEX, "").split("\\s");
+            long count = frequencyService.getCount(trimmedSearchString, formattedString);
+            Set<String> similarWords = similarityService.getSimilarWords(trimmedSearchString, formattedString);
+
+            redirectAttributes.addFlashAttribute(FLASH_ATTRIBUTE_COUNT, "The word \"" + trimmedSearchString + "\" appears " + count + " times in the text.");
+            redirectAttributes.addFlashAttribute("findingsDoc", findingsDoc);
+
             if (similarWords.size() == 0) {
                 redirectAttributes.addFlashAttribute(FLASH_ATTRIBUTE_SIMILAR, "Sorry! No similar words found.");
             } else {
-                redirectAttributes.addFlashAttribute(FLASH_ATTRIBUTE_SIMILAR, "Similar words for \"" + searchInput + "\" are: " + similarWords);
+                redirectAttributes.addFlashAttribute(FLASH_ATTRIBUTE_SIMILAR, "Similar words for \"" + trimmedSearchString + "\" are: " + similarWords);
             }
             return "redirect:/search";
         }
